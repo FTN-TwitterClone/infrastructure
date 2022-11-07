@@ -3,15 +3,28 @@ version: '3'
 services: 
   consul:
     image: consul
+    container_name: consul
     ports:
       - "8500:8500"
       - "8600:8600/tcp"
       - "8600:8600/udp"
     command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
     volumes:
-      - /home/borisavz/consul:/consul/data
+      - ./volumes/consul/data:/consul/data
     networks:
       - network
+  neo4j:
+    image: neo4j:4.4-community
+    container_name: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./volumes/neo4j/conf:/conf
+      - ./volumes/neo4j/data:/data
+      - ./volumes/neo4j/import:/import
+      - ./volumes/neo4j/logs:/logs
+      - ./volumes/neo4j/plugins:/plugins
   api_gateway:
     build:
       context: ./api_gateway/
@@ -49,8 +62,20 @@ services:
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
     networks:
       - network
+  social-graph:
+    build: ../social-graph
+    container_name: social-graph
+    restart: always
+    depends_on:
+      - jaeger
+    environment:
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
+    networks:
+      - network
   jaeger:
     image: jaegertracing/all-in-one:latest
+    container_name: jaeger
     ports:
       - 5775:5775/udp
       - 6831:6831/udp
@@ -63,14 +88,12 @@ services:
       - network
   collector:
     image: otel/opentelemetry-collector:latest
+    container_name: collector
     command: [ "--config=/etc/otel-collector-config.yaml" ]
     volumes:
       - ./api_gateway/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     networks:
       - network
-
-volumes:
-  consul:
 
 networks:
   network:
