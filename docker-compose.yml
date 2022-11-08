@@ -33,6 +33,9 @@ services:
     restart: on-failure
     ports:
       - "8000:8000"
+    volumes:
+      - ./cert:/etc/nginx/cert
+      - ./api_gateway/api_gateway.conf:/etc/nginx/conf.d/api_gateway.conf
     networks:
       - network
   auth:
@@ -47,6 +50,11 @@ services:
       - DBPORT=8500
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
+      - CERT=/cert.pem
+      - KEY=/key.pem
+    volumes:
+      - ./cert/auth/cert.pem:/cert.pem
+      - ./cert/auth/key.pem:/key.pem
     networks:
       - network
   profile:
