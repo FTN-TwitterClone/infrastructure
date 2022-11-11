@@ -13,10 +13,15 @@ services:
     image: mongo:latest
     container_name: mongo
     restart: always
-#    ports:
-#      - "27017:27017"
     volumes:
       - ./volumes/mongo:/data/db
+    networks:
+      - network
+  cassandra:
+    image: cassandra:4.0
+    container_name: cassandra
+    volumes:
+      - ./volumes/cassandra:/var/lib/cassandra
     networks:
       - network
 #  neo4j:
@@ -82,6 +87,27 @@ services:
     volumes:
       - ./cert/profile/cert.pem:/cert.pem
       - ./cert/profile/key.pem:/key.pem
+      - ./cert/twitter_ca/ca-cert.pem:/ca-cert.pem
+    networks:
+      - network
+  tweet:
+    build: ../tweet
+    container_name: tweet
+    restart: always
+    depends_on:
+      - cassandra
+      - jaeger
+    environment:
+      - DB=cassandra
+      - DBPORT=9042
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
+      - CERT=/cert.pem
+      - KEY=/key.pem
+      - CA_CERT=/ca-cert.pem
+    volumes:
+      - ./cert/tweet/cert.pem:/cert.pem
+      - ./cert/tweet/key.pem:/key.pem
       - ./cert/twitter_ca/ca-cert.pem:/ca-cert.pem
     networks:
       - network
