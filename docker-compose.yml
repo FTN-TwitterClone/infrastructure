@@ -4,27 +4,33 @@ services:
   consul:
     image: consul
     container_name: consul
-    ports:
-      - "8500:8500"
-      - "8600:8600/tcp"
-      - "8600:8600/udp"
     command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
     volumes:
       - ./volumes/consul/data:/consul/data
     networks:
       - network
-  neo4j:
-    image: neo4j:4.4-community
-    container_name: neo4j
-    ports:
-      - 7474:7474
-      - 7687:7687
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+#    ports:
+#      - "27017:27017"
     volumes:
-      - ./volumes/neo4j/conf:/conf
-      - ./volumes/neo4j/data:/data
-      - ./volumes/neo4j/import:/import
-      - ./volumes/neo4j/logs:/logs
-      - ./volumes/neo4j/plugins:/plugins
+      - ./volumes/mongo:/data/db
+    networks:
+      - network
+#  neo4j:
+#    image: neo4j:4.4-community
+#    container_name: neo4j
+#    ports:
+#      - 7474:7474
+#      - 7687:7687
+#    volumes:
+#      - ./volumes/neo4j/conf:/conf
+#      - ./volumes/neo4j/data:/data
+#      - ./volumes/neo4j/import:/import
+#      - ./volumes/neo4j/logs:/logs
+#      - ./volumes/neo4j/plugins:/plugins
   api_gateway:
     build:
       context: ./api_gateway/
@@ -66,8 +72,8 @@ services:
     depends_on:
       - jaeger
     environment:
-      - DB=consul
-      - DBPORT=8500
+      - DB=mongo
+      - DBPORT=27017
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
       - CERT=/cert.pem
@@ -79,28 +85,22 @@ services:
       - ./cert/twitter_ca/ca-cert.pem:/ca-cert.pem
     networks:
       - network
-  social-graph:
-    build: ../social-graph
-    container_name: social-graph
-    restart: always
-    depends_on:
-      - jaeger
-    environment:
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
-      - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
-    networks:
-      - network
+#  social-graph:
+#    build: ../social-graph
+#    container_name: social-graph
+#    restart: always
+#    depends_on:
+#      - jaeger
+#    environment:
+#      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+#      - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
+#    networks:
+#      - network
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
     ports:
-      - 5775:5775/udp
-      - 6831:6831/udp
-      - 6832:6832/udp
-      - 5778:5778
-      - 16686:16686
-      - 14268:14268
-      - 9411:9411
+      - "16686:16686"
     networks:
       - network
   collector:
