@@ -24,18 +24,17 @@ services:
       - ./volumes/cassandra:/var/lib/cassandra
     networks:
       - network
-#  neo4j:
-#    image: neo4j:4.4-community
-#    container_name: neo4j
-#    ports:
-#      - 7474:7474
-#      - 7687:7687
-#    volumes:
-#      - ./volumes/neo4j/conf:/conf
-#      - ./volumes/neo4j/data:/data
-#      - ./volumes/neo4j/import:/import
-#      - ./volumes/neo4j/logs:/logs
-#      - ./volumes/neo4j/plugins:/plugins
+  neo4j:
+    image: neo4j:4.4-community
+    container_name: neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/sifra
+    volumes:
+      - ./volumes/neo4j/conf:/conf
+      - ./volumes/neo4j/data:/data
+      - ./volumes/neo4j/import:/import
+      - ./volumes/neo4j/logs:/logs
+      - ./volumes/neo4j/plugins:/plugins
   api_gateway:
     build:
       context: ./api_gateway/
@@ -76,6 +75,7 @@ services:
     restart: always
     depends_on:
       - jaeger
+      - mongo
     environment:
       - DB=mongo
       - DBPORT=27017
@@ -111,17 +111,29 @@ services:
       - ./cert/twitter_ca/ca-cert.pem:/ca-cert.pem
     networks:
       - network
-#  social-graph:
-#    build: ../social-graph
-#    container_name: social-graph
-#    restart: always
-#    depends_on:
-#      - jaeger
-#    environment:
-#      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
-#      - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
-#    networks:
-#      - network
+  social-graph:
+    build: ../social-graph
+    container_name: social-graph
+    restart: always
+    depends_on:
+      - jaeger
+      - neo4j
+    environment:
+      - DB=neo4j
+      - DBPORT=7687
+      - DB_USER=neo4j
+      - DB_PASS=sifra
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
+      - CERT=/cert.pem
+      - KEY=/key.pem
+      - CA_CERT=/ca-cert.pem
+    volumes:
+      - ./cert/social-graph/cert.pem:/cert.pem
+      - ./cert/social-graph/key.pem:/key.pem
+      - ./cert/twitter_ca/ca-cert.pem:/ca-cert.pem
+    networks:
+      - network
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger

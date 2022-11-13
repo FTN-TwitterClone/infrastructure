@@ -2,4 +2,4 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = localhost
 DNS.2 = https-server
-DNS.3 = service-name-here
+DNS.3 = social-graph
