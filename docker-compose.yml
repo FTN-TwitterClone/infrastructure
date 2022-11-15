@@ -1,4 +1,4 @@
-version: '3'
+version: '2.1'
 
 services: 
   consul:
@@ -20,6 +20,11 @@ services:
   cassandra:
     image: cassandra:4.0
     container_name: cassandra
+    healthcheck:
+      test: [ "CMD-SHELL", "[ $$(nodetool statusgossip) = running ]" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     volumes:
       - ./volumes/cassandra:/var/lib/cassandra
     networks:
@@ -41,6 +46,12 @@ services:
       dockerfile: Dockerfile
     container_name: api_gateway
     restart: on-failure
+    depends_on:
+      - auth
+      - tweet
+      - ads
+      - social-graph
+      - profile
     ports:
       - "8000:8000"
     volumes:
@@ -95,8 +106,10 @@ services:
     container_name: tweet
     restart: always
     depends_on:
-      - cassandra
-      - jaeger
+      jaeger:
+        condition: service_started
+      cassandra:
+        condition: service_healthy
     environment:
       - DB=cassandra
       - DBPORT=9042
@@ -139,8 +152,10 @@ services:
     container_name: ads
     restart: always
     depends_on:
-      - cassandra
-      - jaeger
+      jaeger:
+        condition: service_started
+      cassandra:
+        condition: service_healthy
     environment:
       - DB=cassandra
       - DBPORT=9042
