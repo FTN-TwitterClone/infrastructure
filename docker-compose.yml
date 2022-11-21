@@ -40,6 +40,8 @@ services:
       - ./volumes/neo4j/import:/import
       - ./volumes/neo4j/logs:/logs
       - ./volumes/neo4j/plugins:/plugins
+    networks:
+      - network
   api_gateway:
     build:
       context: ./api_gateway/
