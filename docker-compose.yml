@@ -73,6 +73,7 @@ services:
       - SMTP_PORT=587
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
+      - CAPTCHA_SECRET_KEY=6LcJfBwjAAAAAFm6TFuyeyokTO1LrdIdBavtOnXj
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
       - CERT=/cert.pem
