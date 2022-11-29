@@ -34,6 +34,11 @@ services:
     container_name: neo4j
     environment:
       - NEO4J_AUTH=neo4j/sifra
+    ports:
+      # bolt
+      - "7687:7687"
+      # http
+      - "7474:7474"
     volumes:
       - ./volumes/neo4j/conf:/conf
       - ./volumes/neo4j/data:/data
