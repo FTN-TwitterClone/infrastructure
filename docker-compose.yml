@@ -47,6 +47,14 @@ services:
       - ./volumes/neo4j/plugins:/plugins
     networks:
       - network
+  nats:
+    image: nats
+    container_name: nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    networks:
+      - network
   api_gateway:
     build:
       context: ./api_gateway/
@@ -80,6 +88,8 @@ services:
       - SMTP_PORT=587
       - SMTP_USER=zivanovic.sr6.2020@uns.ac.rs
       - SMTP_PASS=123456
+      - NATS_HOST=nats
+      - NATS_PORT=4222
       - CAPTCHA_SECRET_KEY=6LcJfBwjAAAAAFm6TFuyeyokTO1LrdIdBavtOnXj
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
