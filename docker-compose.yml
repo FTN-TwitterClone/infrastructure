@@ -81,6 +81,7 @@ services:
     depends_on:
       - consul
       - jaeger
+      - nats
     environment:
       - DB=consul
       - DBPORT=8500
@@ -111,9 +112,12 @@ services:
     depends_on:
       - jaeger
       - mongo
+      - nats
     environment:
       - DB=mongo
       - DBPORT=27017
+      - NATS_HOST=nats
+      - NATS_PORT=4222
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
       - CERT=/cert.pem
@@ -155,11 +159,14 @@ services:
     depends_on:
       - jaeger
       - neo4j
+      - nats
     environment:
       - DB=neo4j
       - DBPORT=7687
       - DB_USER=neo4j
       - DB_PASS=sifra
+      - NATS_HOST=nats
+      - NATS_PORT=4222
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
       - CERT=/cert.pem
