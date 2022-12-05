@@ -146,10 +146,12 @@ services:
       - CERT=/cert.pem
       - KEY=/key.pem
       - CA_CERT=/ca-cert.pem
+      - IMAGES=/images
     volumes:
       - ./cert/tweet/cert.pem:/cert.pem
       - ./cert/tweet/key.pem:/key.pem
       - ./cert/twitter_ca/ca-cert.pem:/ca-cert.pem
+      - ./images/tweets:/images
     networks:
       - network
   social-graph:
