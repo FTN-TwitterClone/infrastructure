@@ -55,6 +55,16 @@ services:
       - "8222:8222"
     networks:
       - network
+  redis:
+    image: redis
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    # We instruct redis to store data to disk every 20 seconds if there was at least 1 write operation
+    command: "redis-server --save 20 1 --loglevel warning"
+    volumes:
+      - ./volumes/redis/redis_data:/data
   api_gateway:
     build:
       context: ./api_gateway/
@@ -138,6 +148,8 @@ services:
         condition: service_started
       cassandra:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - DB=cassandra
       - DBPORT=9042
@@ -147,6 +159,8 @@ services:
       - KEY=/key.pem
       - CA_CERT=/ca-cert.pem
       - IMAGES=/images
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     volumes:
       - ./cert/tweet/cert.pem:/cert.pem
       - ./cert/tweet/key.pem:/key.pem
