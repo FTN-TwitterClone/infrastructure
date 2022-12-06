@@ -206,8 +206,10 @@ services:
       cassandra:
         condition: service_healthy
     environment:
-      - DB=cassandra
-      - DBPORT=9042
+      - CASSANDRA_DB=cassandra
+      - CASSANDRA_DBPORT=9042
+      - MONGO_DB=mongo
+      - MONGO_DBPORT=27017
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
       - SECRET_KEY=c8cd5f4392ca571f5e9610c9e27ccab4857b1b39267e6deb54ebb0962be0509cb0234d75cfff63f6d70723d670644c60e32e86dac39574e413a1fc2f8383bf75
       - CERT=/cert.pem
