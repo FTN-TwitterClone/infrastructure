@@ -65,6 +65,8 @@ services:
     command: "redis-server --save 20 1 --loglevel warning"
     volumes:
       - ./volumes/redis/redis_data:/data
+    networks:
+      - network
   api_gateway:
     build:
       context: ./api_gateway/
