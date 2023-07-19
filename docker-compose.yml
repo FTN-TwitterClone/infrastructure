@@ -221,6 +221,17 @@ services:
       - ./cert/twitter_ca/ca-cert.pem:/ca-cert.pem
     networks:
       - network
+  frontend:
+    build:
+      context: ../frontend
+      args:
+        DOCKER_BUILDKIT: 1
+    container_name: frontend
+    restart: always
+    ports:
+      - "4200:80"
+    networks:
+      - network
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
